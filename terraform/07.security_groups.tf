@@ -5,7 +5,7 @@ resource "aws_security_group" "bastion_sg" {
   vpc_id      = aws_vpc.raku_vpc.id
 
   tags = {
-    Name = "bastion_sg"
+    Name = "bastion-sg"
   }
 }
 
@@ -34,7 +34,7 @@ resource "aws_security_group_rule" "bastion_allow_egress" {
    vpc_id      = aws_vpc.raku_vpc.id
 
    tags = {
-     Name = "cluster_sg"
+     Name = "cluster-sg"
    }
  }
 
@@ -63,7 +63,7 @@ resource "aws_security_group_rule" "bastion_allow_egress" {
    vpc_id      = aws_vpc.raku_vpc.id
 
    tags = {
-     Name = "node_grp_sg"
+     Name = "node-grp-sg"
    }
  }
 
@@ -94,7 +94,7 @@ resource "aws_security_group" "redis_sg" {
   vpc_id      = aws_vpc.raku_vpc.id
 
   tags = {
-    Name = "redis_sg"
+    Name = "redis-sg"
   }
 }
 
