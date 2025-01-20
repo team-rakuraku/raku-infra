@@ -27,6 +27,56 @@ resource "aws_security_group_rule" "bastion_allow_egress" {
   security_group_id = aws_security_group.bastion_sg.id
 }
 
+#Master
+ resource "aws_security_group" "master_sg" {
+   name        = "master-sg"
+   description = "Allow traffic for a master_node"
+   vpc_id      = aws_vpc.raku_vpc.id
+
+   tags = {
+     Name = "master-sg"
+   }
+ }
+
+ resource "aws_security_group_rule" "master_allow_ingress" {
+  type              = "ingress"
+  from_port         = 22
+  to_port           = 22
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.master_sg.id
+}
+
+# EKS API 서버 접근 허용 (노드 그룹이 접근 가능하도록 설정)
+resource "aws_security_group_rule" "master_allow_api" {
+  type              = "ingress"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  source_security_group_id = aws_security_group.node_grp_sg.id
+  security_group_id = aws_security_group.master_sg.id
+}
+
+# etcd 통신 (노드 그룹 <-> 마스터 노드)
+resource "aws_security_group_rule" "master_allow_etcd" {
+  type              = "ingress"
+  from_port         = 2379
+  to_port           = 2380
+  protocol          = "tcp"
+  source_security_group_id = aws_security_group.node_grp_sg.id
+  security_group_id = aws_security_group.master_sg.id
+}
+
+resource "aws_security_group_rule" "master_allow_egress" {
+  type              = "egress"
+  from_port         = 0
+  to_port           = 0
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.master_sg.id
+}
+
+
 #EKS Cluster
  resource "aws_security_group" "cluster_sg" {
    name        = "cluster-sg"
@@ -66,8 +116,17 @@ resource "aws_security_group_rule" "bastion_allow_egress" {
      Name = "node-grp-sg"
    }
  }
-
- resource "aws_security_group_rule" "allow_ingress_from_cluster" {
+# 노드 그룹에서 마스터 노드 API 서버 접근 허용
+resource "aws_security_group_rule" "node_allow_api" {
+  type              = "egress"
+  from_port         = 443
+  to_port           = 443
+  protocol          = "tcp"
+  security_group_id = aws_security_group.master_sg.id
+  source_security_group_id = aws_security_group.node_grp_sg.id
+}
+# 노드 그룹 내부 통신 허용 (Pod 간 통신)
+resource "aws_security_group_rule" "node_allow_ingress_from_cluster" {
    type                     = "ingress"
    from_port                = 0
    to_port                  = 65535
@@ -75,8 +134,28 @@ resource "aws_security_group_rule" "bastion_allow_egress" {
    source_security_group_id = aws_security_group.cluster_sg.id
    security_group_id        = aws_security_group.node_grp_sg.id
    }
+# 노드 그룹에서 kubelet API 사용 (마스터 노드 <-> 노드)
+resource "aws_security_group_rule" "node_allow_kubelet" {
+  type              = "ingress"
+  from_port         = 10250
+  to_port           = 10250
+  protocol          = "tcp"
+  source_security_group_id = aws_security_group.master_sg.id
+  security_group_id = aws_security_group.node_grp_sg.id
+}
 
- resource "aws_security_group_rule" "allow_egress_node_group" {
+# 노드 그룹에서 서비스(NodePort) 접근 허용
+resource "aws_security_group_rule" "node_allow_nodeport" {
+  type              = "ingress"
+  from_port         = 30000
+  to_port           = 32767
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]  # ALB가 접근할 수 있도록 허용
+  security_group_id = aws_security_group.node_grp_sg.id
+}
+ 
+
+ resource "aws_security_group_rule" "node_allow_egress" {
    type              = "egress"
    from_port         = 0
    to_port           = 65535

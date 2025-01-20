@@ -5,12 +5,13 @@ resource "aws_key_pair" "raku_key" {
 }
 
 
-data "aws_ami" "my_test_ami" {
+
+data "aws_ami" "bastion_nat" {
   most_recent = true
 
   filter {
     name   = "owner-id"
-    values = ["440744219357"] # 나중에 수정 예정 
+    values = ["340752825860"] # 나중에 수정 예정 
   }
 
   filter {
@@ -18,12 +19,12 @@ data "aws_ami" "my_test_ami" {
     values = ["available"]
   }
 
-  owners = ["440744219357"]
+  owners = ["340752825860"]
 }
 
 
 resource "aws_instance" "raku_bastion_nat" {
-  ami           = data.aws_ami.my_test_ami.id
+  ami           = data.aws_ami.bastion_nat.id
   instance_type = "t3.small" # 나중에 규모 커지면 t3.medium까지 확장 가능 
   subnet_id                   = aws_subnet.raku_pub01_2a.id
   associate_public_ip_address = "true"
