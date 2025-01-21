@@ -30,8 +30,8 @@ resource "aws_eks_node_group" "raku_node_group" {
     "role" = "raku_node_iam_role"
   }
   scaling_config {
-    desired_size = 10
-    min_size     = 10
+    desired_size = 2
+    min_size     = 2
     max_size     = 20
     }
   depends_on = [
