@@ -66,22 +66,8 @@ resource "aws_iam_role_policy_attachment" "AmazonEC2ContainerRegistryReadOnly" {
 
 # IAM 사용자에 AdministratorAccess 권한 부여
 resource "aws_iam_user_policy_attachment" "infra_user_admin_access" {
-  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
-  user       = "infra-user-1"
-}
+  for_each  = toset(["infra-user-1", "infra-user-2", "infra-user-3", "kcia-student-04"])
 
-resource "aws_iam_user_policy_attachment" "infra_user_admin_access" {
   policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
-  user       = "infra-user-2"
-}
-
-resource "aws_iam_user_policy_attachment" "infra_user_admin_access" {
-  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
-  user       = "infra-user-3"
-}
-
-# IAM 역할에 AdministratorAccess 권한 부여
-resource "aws_iam_role_policy_attachment" "raku_bastion_role_admin_access" {
-  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
-  role       = "raku_bastion_role"
+  user       = each.value
 }
