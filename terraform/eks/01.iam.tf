@@ -62,3 +62,26 @@ resource "aws_iam_role_policy_attachment" "AmazonEC2ContainerRegistryReadOnly" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   role       = aws_iam_role.raku_node_iam_role.name
 }
+
+
+# IAM 사용자에 AdministratorAccess 권한 부여
+resource "aws_iam_user_policy_attachment" "infra_user_admin_access" {
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+  user       = "infra-user-1"
+}
+
+resource "aws_iam_user_policy_attachment" "infra_user_admin_access" {
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+  user       = "infra-user-2"
+}
+
+resource "aws_iam_user_policy_attachment" "infra_user_admin_access" {
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+  user       = "infra-user-3"
+}
+
+# IAM 역할에 AdministratorAccess 권한 부여
+resource "aws_iam_role_policy_attachment" "raku_bastion_role_admin_access" {
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+  role       = "raku_bastion_role"
+}
